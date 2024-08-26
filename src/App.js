@@ -23,6 +23,8 @@ const App = () => {
   const [allDetails, setAllDetails] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  API_BASE_URL=https://webpage-fetcher-backend-tool.vercel.app/api/test
+
   const fetchData = async () => {
     setLoading(true);
     try {

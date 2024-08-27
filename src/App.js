@@ -76,7 +76,7 @@ const App = () => {
           { title: 'Level', dataIndex: 'level', key: 'level' },
           { title: 'Text', dataIndex: 'text', key: 'text' },
         ]);
-        setData(responseData.headings?.map((heading, index) => ({ key: index, ...heading })) || []);
+        setData(responseData.headingHierarchy?.map((heading, index) => ({ key: index, ...heading })) || []);
       } else if (dataType === 'all-details') {
         setAllDetails(responseData);
       }
@@ -168,7 +168,6 @@ const App = () => {
               { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <div style={{ color: getStatusColor(record.statusCode) }}>{text}</div> },
               { title: 'Target', dataIndex: 'target', key: 'target' },
             ]}
-            pagination={false}
           />
           <h2>Image Details</h2>
           <Table
@@ -177,7 +176,6 @@ const App = () => {
               { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
               { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
             ]}
-            pagination={false}
           />
           <h2>Video Details</h2>
           <Table
@@ -190,16 +188,14 @@ const App = () => {
               { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
               { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
             ]}
-            pagination={false}
           />
           <h2>Page Properties</h2>
           <Table
-            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((property, index) => ({ key: index, ...property })) : []}
+            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((meta, index) => ({ key: index, ...meta })) : []}
             columns={[
               { title: 'Name', dataIndex: 'name', key: 'name' },
               { title: 'Content', dataIndex: 'content', key: 'content' },
             ]}
-            pagination={false}
           />
           <h2>Heading Hierarchy</h2>
           <Table
@@ -208,15 +204,15 @@ const App = () => {
               { title: 'Level', dataIndex: 'level', key: 'level' },
               { title: 'Text', dataIndex: 'text', key: 'text' },
             ]}
-            pagination={false}
           />
         </>
       )}
+
       {dataType !== 'all-details' && (
         <Table
           dataSource={data}
           columns={columns}
-          pagination={false}
+          loading={loading}
         />
       )}
     </div>

@@ -104,9 +104,13 @@ const App = () => {
       const sheetData = {
         'Link Details': Array.isArray(allDetails.links) ? allDetails.links : [],
         'Image Details': Array.isArray(allDetails.images) ? allDetails.images : [],
-        'Video Details': Array.isArray(allDetails.videos) ? allDetails.videos : [],
+        'Video Details': Array.isArray(allDetails.videoDetails) ? allDetails.videoDetails.map(video => ({
+          ...video,
+          transcript: video.transcript.join(', '),
+          cc: video.cc.join(', '),
+        })) : [],
         'Page Properties': Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties : [],
-        'Heading Details': Array.isArray(allDetails.headings) ? allDetails.headings : [],
+        'Heading Details': Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy : [],
       };
 
       const workbook = XLSX.utils.book_new();
@@ -180,20 +184,22 @@ const App = () => {
               { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <div style={{ color: getStatusColor(record.statusCode) }}>{text}</div> },
               { title: 'Target', dataIndex: 'target', key: 'target' },
             ]}
+            pagination={{ pageSize: 10 }}
+            scroll={{ y: 300 }}
           />
-
           <h2>Image Details</h2>
           <Table
-            dataSource={Array.isArray(allDetails.images) ? allDetails.images.map((image, index) => ({ key: index, ...image })) : []}
+            dataSource={Array.isArray(allDetails.images) ? allDetails.images.filter(image => image.imageName).map((image, index) => ({ key: index, ...image })) : []}
             columns={[
               { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
               { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
             ]}
+            pagination={{ pageSize: 10 }}
+            scroll={{ y: 300 }}
           />
-
           <h2>Video Details</h2>
           <Table
-            dataSource={Array.isArray(allDetails.videos) ? allDetails.videos.map((video, index) => ({
+            dataSource={Array.isArray(allDetails.videoDetails) ? allDetails.videoDetails.map((video, index) => ({
               key: index,
               transcript: video.transcript.join(', '),
               cc: video.cc.join(', '),
@@ -210,8 +216,9 @@ const App = () => {
               { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
               { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
             ]}
+            pagination={{ pageSize: 10 }}
+            scroll={{ y: 300 }}
           />
-
           <h2>Page Properties</h2>
           <Table
             dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((property, index) => ({ key: index, ...property })) : []}
@@ -219,27 +226,27 @@ const App = () => {
               { title: 'Name', dataIndex: 'name', key: 'name' },
               { title: 'Content', dataIndex: 'content', key: 'content' },
             ]}
+            pagination={{ pageSize: 10 }}
+            scroll={{ y: 300 }}
           />
-
-          <h2>Heading Details</h2>
+          <h2>Heading Hierarchy</h2>
           <Table
-            dataSource={Array.isArray(allDetails.headings) ? allDetails.headings.map((heading, index) => ({
-              key: index,
-              level: heading.level,
-              text: heading.text,
-            })) : []}
+            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({ key: index, ...heading })) : []}
             columns={[
               { title: 'Level', dataIndex: 'level', key: 'level' },
               { title: 'Text', dataIndex: 'text', key: 'text' },
             ]}
+            pagination={{ pageSize: 10 }}
+            scroll={{ y: 300 }}
           />
         </>
       )}
-
       {dataType !== 'all-details' && (
         <Table
           dataSource={data}
           columns={columns}
+          pagination={{ pageSize: 10 }}
+          scroll={{ y: 300 }}
         />
       )}
     </div>
@@ -247,4 +254,3 @@ const App = () => {
 };
 
 export default App;
-

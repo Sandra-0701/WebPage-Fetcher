@@ -1,18 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Button, Input, Select, Checkbox, message } from 'antd';
 import * as XLSX from 'xlsx';
 import './style.css';
 
 const { Option } = Select;
-
-// Define the function to get status color
-const getStatusColor = (statusCode) => {
-  if (statusCode >= 500) return 'red'; // Server errors
-  if (statusCode >= 400) return 'orange'; // Client errors
-  if (statusCode >= 300) return 'blue'; // Redirects
-  return 'green'; // Successful responses
-};
 
 const App = () => {
   const [url, setUrl] = useState('');
@@ -34,7 +26,8 @@ const App = () => {
       });
       const responseData = response.data;
 
-      // Set data and columns based on data type
+      console.log('Response data:', responseData);
+
       if (dataType === 'extract-urls') {
         setColumns([{ title: 'URL', dataIndex: 'url', key: 'url' }]);
         setData(responseData.urls?.map((url, index) => ({ key: index, url })) || []);
@@ -55,7 +48,6 @@ const App = () => {
         ]);
         
         setData(Array.isArray(responseData.links) ? responseData.links.map((link, index) => ({ key: index, ...link })) : []);
-
       } else if (dataType === 'image-details') {
         setColumns([
           { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
@@ -106,6 +98,10 @@ const App = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log('Data state updated:', data);
+  }, [data]);
 
   const handleDownloadExcel = () => {
     if (allDetails) {
@@ -189,7 +185,7 @@ const App = () => {
               { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
               { title: 'URL', dataIndex: 'url', key: 'url' },
               { title: 'Redirected URL', dataIndex: 'redirectedUrl', key: 'redirectedUrl' },
-              { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <div style={{ color: getStatusColor(record.statusCode) }}>{text}</div> },
+              { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <span style={{ color: record.statusColor }}>{text}</span> },
               { title: 'Target', dataIndex: 'target', key: 'target' },
             ]}
             pagination={{ pageSize: 10 }}
@@ -250,12 +246,16 @@ const App = () => {
         </>
       )}
       {dataType !== 'all-details' && (
-        <Table
-          dataSource={data}
-          columns={columns}
-          pagination={{ pageSize: 10 }}
-          scroll={{ y: 300 }}
-        />
+        <>
+          <Table
+            dataSource={data}
+            columns={columns}
+            pagination={{ pageSize: 10 }}
+            scroll={{ y: 300 }}
+          />
+          <div>Debug: Data length: {data.length}</div>
+          <div>Debug: First data item: {JSON.stringify(data[0])}</div>
+        </>
       )}
     </div>
   );

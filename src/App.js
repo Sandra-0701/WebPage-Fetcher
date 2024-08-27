@@ -81,6 +81,8 @@ const App = () => {
           level: heading.level,
           text: heading.text,
         })) || []);
+      }
+      
       } else if (dataType === 'all-details') {
         setAllDetails(responseData);
       }

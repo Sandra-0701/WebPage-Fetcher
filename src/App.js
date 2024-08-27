@@ -76,7 +76,11 @@ const App = () => {
           { title: 'Level', dataIndex: 'level', key: 'level' },
           { title: 'Text', dataIndex: 'text', key: 'text' },
         ]);
-        setData(responseData.headingHierarchy?.map((heading, index) => ({ key: index, ...heading })) || []);
+        setData(responseData.headingHierarchy?.map((heading, index) => ({
+          key: index,
+          level: heading.level,
+          text: heading.text,
+        })) || []);
       } else if (dataType === 'all-details') {
         setAllDetails(responseData);
       }

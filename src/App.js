@@ -6,12 +6,11 @@ import './style.css';
 
 const { Option } = Select;
 
-// Define the function to get status color
 const getStatusColor = (statusCode) => {
-  if (statusCode >= 500) return 'red'; // Server errors
-  if (statusCode >= 400) return 'orange'; // Client errors
-  if (statusCode >= 300) return 'blue'; // Redirects
-  return 'green'; // Successful responses
+  if (statusCode >= 500) return 'red'; 
+  if (statusCode >= 400) return 'orange'; 
+  if (statusCode >= 300) return 'blue'; 
+  return 'green'; 
 };
 
 const App = () => {
@@ -23,7 +22,7 @@ const App = () => {
   const [allDetails, setAllDetails] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const API_BASE_URL = 'https://webpage-fetcher-backend-tool.vercel.app/api';
+  const API_BASE_URL = 'https://backend-webfetcher.vercel.app/api';
 
   const fetchData = async () => {
     setLoading(true);
@@ -144,7 +143,7 @@ const App = () => {
         value={dataType}
         onChange={(value) => {
           setDataType(value);
-          setData([]); // Clear data on data type change
+          setData([]); 
         }}
         style={{ width: 200, marginBottom: 10 }}
       >
@@ -199,7 +198,7 @@ const App = () => {
             dataSource={Array.isArray(allDetails.images) ? allDetails.images.map((image, index) => ({ key: index, ...image })) : []}
             columns={[
               { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
-              { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
+              { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> }
             ]}
           />
 

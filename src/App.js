@@ -47,6 +47,7 @@ const App = () => {
           { title: 'Target', dataIndex: 'target', key: 'target' },
         ]);
         
+        
         setData(Array.isArray(responseData.links) ? responseData.links.map((link, index) => ({ key: index, ...link })) : []);
       } else if (dataType === 'image-details') {
         setColumns([

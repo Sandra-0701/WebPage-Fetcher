@@ -39,6 +39,7 @@ const App = () => {
         setColumns([{ title: 'URL', dataIndex: 'url', key: 'url' }]);
         setData(responseData.urls?.map((url, index) => ({ key: index, url })) || []);
       } else if (dataType === 'link-details') {
+        console.log('Link Details Data:', responseData.links); // Debugging line
         setColumns([
           { title: 'Link Type', dataIndex: 'linkType', key: 'linkType' },
           { title: 'Link Text', dataIndex: 'linkText', key: 'linkText', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
@@ -49,6 +50,14 @@ const App = () => {
           { title: 'Target', dataIndex: 'target', key: 'target' },
         ]);
         setData(responseData.links?.map((link, index) => ({ key: index, ...link })) || []);
+      }
+      // Other data types handling
+    } catch (error) {
+      message.error('Failed to fetch data.');
+    } finally {
+      setLoading(false);
+    }
+  };
       } else if (dataType === 'image-details') {
         setColumns([
           { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },

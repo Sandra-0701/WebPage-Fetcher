@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { Table, Button, Input, Select, Checkbox, message } from 'antd';
 import * as XLSX from 'xlsx';
 import './style.css';
 
 const { Option } = Select;
+
+// Define the function to get status color
+const getStatusColor = (statusCode) => {
+  if (statusCode >= 500) return 'red'; // Server errors
+  if (statusCode >= 400) return 'orange'; // Client errors
+  if (statusCode >= 300) return 'blue'; // Redirects
+  return 'green'; // Successful responses
+};
 
 const App = () => {
   const [url, setUrl] = useState('');
@@ -26,8 +34,6 @@ const App = () => {
       });
       const responseData = response.data;
 
-      console.log('Response data:', responseData);
-
       if (dataType === 'extract-urls') {
         setColumns([{ title: 'URL', dataIndex: 'url', key: 'url' }]);
         setData(responseData.urls?.map((url, index) => ({ key: index, url })) || []);
@@ -46,7 +52,6 @@ const App = () => {
           },
           { title: 'Target', dataIndex: 'target', key: 'target' },
         ]);
-        
         setData(Array.isArray(responseData.links) ? responseData.links.map((link, index) => ({ key: index, ...link })) : []);
       } else if (dataType === 'image-details') {
         setColumns([
@@ -99,10 +104,6 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    console.log('Data state updated:', data);
-  }, [data]);
-
   const handleDownloadExcel = () => {
     if (allDetails) {
       const sheetData = {
@@ -141,7 +142,10 @@ const App = () => {
       />
       <Select
         value={dataType}
-        onChange={(value) => setDataType(value)}
+        onChange={(value) => {
+          setDataType(value);
+          setData([]); // Clear data on data type change
+        }}
         style={{ width: 200, marginBottom: 10 }}
       >
         <Option value="extract-urls">Extract URLs</Option>
@@ -185,22 +189,20 @@ const App = () => {
               { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
               { title: 'URL', dataIndex: 'url', key: 'url' },
               { title: 'Redirected URL', dataIndex: 'redirectedUrl', key: 'redirectedUrl' },
-              { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <span style={{ color: record.statusColor }}>{text}</span> },
+              { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <span style={{ color: getStatusColor(record.statusCode) }}>{text}</span> },
               { title: 'Target', dataIndex: 'target', key: 'target' },
             ]}
-            pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
           />
+
           <h2>Image Details</h2>
           <Table
-            dataSource={Array.isArray(allDetails.images) ? allDetails.images.filter(image => image.imageName).map((image, index) => ({ key: index, ...image })) : []}
+            dataSource={Array.isArray(allDetails.images) ? allDetails.images.map((image, index) => ({ key: index, ...image })) : []}
             columns={[
               { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
               { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
             ]}
-            pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
           />
+
           <h2>Video Details</h2>
           <Table
             dataSource={Array.isArray(allDetails.videoDetails) ? allDetails.videoDetails.map((video, index) => ({
@@ -220,42 +222,38 @@ const App = () => {
               { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
               { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
             ]}
-            pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
           />
+
           <h2>Page Properties</h2>
           <Table
-            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((property, index) => ({ key: index, ...property })) : []}
+            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((meta, index) => ({ key: index, ...meta })) : []}
             columns={[
               { title: 'Name', dataIndex: 'name', key: 'name' },
               { title: 'Content', dataIndex: 'content', key: 'content' },
             ]}
-            pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
           />
+
           <h2>Heading Hierarchy</h2>
           <Table
-            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({ key: index, ...heading })) : []}
+            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({
+              key: index,
+              level: heading.level,
+              text: heading.text,
+            })) : []}
             columns={[
               { title: 'Level', dataIndex: 'level', key: 'level' },
               { title: 'Text', dataIndex: 'text', key: 'text' },
             ]}
-            pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
           />
         </>
       )}
-      {dataType !== 'all-details' && (
-        <>
-          <Table
-            dataSource={data}
-            columns={columns}
-            pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
-          />
-          <div>Debug: Data length: {data.length}</div>
-          <div>Debug: First data item: {JSON.stringify(data[0])}</div>
-        </>
+
+      {data.length > 0 && (
+        <Table
+          dataSource={data}
+          columns={columns}
+          pagination={{ pageSize: 10 }}
+        />
       )}
     </div>
   );

@@ -17,7 +17,7 @@ const getStatusColor = (statusCode) => {
 const App = () => {
   const [url, setUrl] = useState('');
   const [dataType, setDataType] = useState('all-details');
-  const [onlyUhf, setOnlyUhf] = useState(true); // State for the checkbox
+  const [onlyUhf, setOnlyUhf] = useState(true); 
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [allDetails, setAllDetails] = useState(null);

@@ -30,7 +30,7 @@ const App = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/${dataType}`, {
         url,
-        onlyUhf, // Send the checkbox state to the server
+        onlyUhf,
       });
       const responseData = response.data;
 

@@ -45,7 +45,12 @@ const App = () => {
           { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
           { title: 'URL', dataIndex: 'url', key: 'url' },
           { title: 'Redirected URL', dataIndex: 'redirectedUrl', key: 'redirectedUrl' },
-          { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <div style={{ color: getStatusColor(record.statusCode) }}>{text}</div> },
+          { 
+            title: 'Status Code', 
+            dataIndex: 'statusCode', 
+            key: 'statusCode', 
+            render: (text, record) => <span style={{ color: record.statusColor }}>{text}</span> 
+          },
           { title: 'Target', dataIndex: 'target', key: 'target' },
         ]);
         
@@ -95,6 +100,7 @@ const App = () => {
         setAllDetails(responseData);
       }
     } catch (error) {
+      console.error('Error fetching data:', error);
       message.error('Failed to fetch data.');
     } finally {
       setLoading(false);

@@ -39,7 +39,6 @@ const App = () => {
         setColumns([{ title: 'URL', dataIndex: 'url', key: 'url' }]);
         setData(responseData.urls?.map((url, index) => ({ key: index, url })) || []);
       } else if (dataType === 'link-details') {
-        console.log('Link Details Data:', responseData.links); // Debugging line
         setColumns([
           { title: 'Link Type', dataIndex: 'linkType', key: 'linkType' },
           { title: 'Link Text', dataIndex: 'linkText', key: 'linkText', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
@@ -50,14 +49,6 @@ const App = () => {
           { title: 'Target', dataIndex: 'target', key: 'target' },
         ]);
         setData(responseData.links?.map((link, index) => ({ key: index, ...link })) || []);
-      }
-      // Other data types handling
-    } catch (error) {
-      message.error('Failed to fetch data.');
-    } finally {
-      setLoading(false);
-    }
-  };
       } else if (dataType === 'image-details') {
         setColumns([
           { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
@@ -194,7 +185,7 @@ const App = () => {
               { title: 'Target', dataIndex: 'target', key: 'target' },
             ]}
             pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
+            style={{ marginBottom: 20 }}
           />
           <h2>Image Details</h2>
           <Table
@@ -204,7 +195,7 @@ const App = () => {
               { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
             ]}
             pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
+            style={{ marginBottom: 20 }}
           />
           <h2>Video Details</h2>
           <Table
@@ -226,36 +217,42 @@ const App = () => {
               { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
             ]}
             pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
+            style={{ marginBottom: 20 }}
           />
           <h2>Page Properties</h2>
           <Table
-            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((property, index) => ({ key: index, ...property })) : []}
+            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties : []}
             columns={[
               { title: 'Name', dataIndex: 'name', key: 'name' },
               { title: 'Content', dataIndex: 'content', key: 'content' },
             ]}
             pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
+            style={{ marginBottom: 20 }}
           />
-          <h2>Heading Hierarchy</h2>
+          <h2>Heading Details</h2>
           <Table
-            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({ key: index, ...heading })) : []}
+            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({
+              key: index,
+              level: heading.level,
+              text: heading.text,
+            })) : []}
             columns={[
               { title: 'Level', dataIndex: 'level', key: 'level' },
               { title: 'Text', dataIndex: 'text', key: 'text' },
             ]}
             pagination={{ pageSize: 10 }}
-            scroll={{ y: 300 }}
+            style={{ marginBottom: 20 }}
           />
         </>
       )}
+
       {dataType !== 'all-details' && (
         <Table
           dataSource={data}
           columns={columns}
           pagination={{ pageSize: 10 }}
-          scroll={{ y: 300 }}
+          loading={loading}
+          style={{ marginTop: 20 }}
         />
       )}
     </div>

@@ -48,6 +48,7 @@ const App = () => {
           { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <div style={{ color: getStatusColor(record.statusCode) }}>{text}</div> },
           { title: 'Target', dataIndex: 'target', key: 'target' },
         ]);
+        
         setData(responseData.links?.map((link, index) => ({ key: index, ...link })) || []);
       } else if (dataType === 'image-details') {
         setColumns([
@@ -185,7 +186,7 @@ const App = () => {
               { title: 'Target', dataIndex: 'target', key: 'target' },
             ]}
             pagination={{ pageSize: 10 }}
-            style={{ marginBottom: 20 }}
+            scroll={{ y: 300 }}
           />
           <h2>Image Details</h2>
           <Table
@@ -195,7 +196,7 @@ const App = () => {
               { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
             ]}
             pagination={{ pageSize: 10 }}
-            style={{ marginBottom: 20 }}
+            scroll={{ y: 300 }}
           />
           <h2>Video Details</h2>
           <Table
@@ -217,42 +218,36 @@ const App = () => {
               { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
             ]}
             pagination={{ pageSize: 10 }}
-            style={{ marginBottom: 20 }}
+            scroll={{ y: 300 }}
           />
           <h2>Page Properties</h2>
           <Table
-            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties : []}
+            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((property, index) => ({ key: index, ...property })) : []}
             columns={[
               { title: 'Name', dataIndex: 'name', key: 'name' },
               { title: 'Content', dataIndex: 'content', key: 'content' },
             ]}
             pagination={{ pageSize: 10 }}
-            style={{ marginBottom: 20 }}
+            scroll={{ y: 300 }}
           />
-          <h2>Heading Details</h2>
+          <h2>Heading Hierarchy</h2>
           <Table
-            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({
-              key: index,
-              level: heading.level,
-              text: heading.text,
-            })) : []}
+            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({ key: index, ...heading })) : []}
             columns={[
               { title: 'Level', dataIndex: 'level', key: 'level' },
               { title: 'Text', dataIndex: 'text', key: 'text' },
             ]}
             pagination={{ pageSize: 10 }}
-            style={{ marginBottom: 20 }}
+            scroll={{ y: 300 }}
           />
         </>
       )}
-
       {dataType !== 'all-details' && (
         <Table
           dataSource={data}
           columns={columns}
           pagination={{ pageSize: 10 }}
-          loading={loading}
-          style={{ marginTop: 20 }}
+          scroll={{ y: 300 }}
         />
       )}
     </div>

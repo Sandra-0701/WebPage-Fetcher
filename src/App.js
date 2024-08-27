@@ -48,6 +48,7 @@ const App = () => {
           { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <div style={{ color: getStatusColor(record.statusCode) }}>{text}</div> },
           { title: 'Target', dataIndex: 'target', key: 'target' },
         ]);
+        
         setData(responseData.links?.map((link, index) => ({ key: index, ...link })) || []);
       } else if (dataType === 'image-details') {
         setColumns([

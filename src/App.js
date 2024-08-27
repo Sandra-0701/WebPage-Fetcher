@@ -64,7 +64,15 @@ const App = () => {
           { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
           { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
         ]);
-        setData(responseData.videos?.map((video, index) => ({ key: index, ...video })) || []);
+        setData(responseData.videoDetails?.map((video, index) => ({
+          key: index,
+          transcript: video.transcript.join(', '),
+          cc: video.cc.join(', '),
+          autoplay: video.autoplay,
+          muted: video.muted,
+          ariaLabel: video.ariaLabel,
+          audioTrack: video.audioTrack,
+        })) || []);
       } else if (dataType === 'page-properties') {
         setColumns([
           { title: 'Name', dataIndex: 'name', key: 'name' },
@@ -81,8 +89,6 @@ const App = () => {
           level: heading.level,
           text: heading.text,
         })) || []);
-      }
-      
       } else if (dataType === 'all-details') {
         setAllDetails(responseData);
       }
@@ -100,7 +106,7 @@ const App = () => {
         'Image Details': Array.isArray(allDetails.images) ? allDetails.images : [],
         'Video Details': Array.isArray(allDetails.videos) ? allDetails.videos : [],
         'Page Properties': Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties : [],
-        'Heading Details': Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy : [],
+        'Heading Details': Array.isArray(allDetails.headings) ? allDetails.headings : [],
       };
 
       const workbook = XLSX.utils.book_new();
@@ -175,17 +181,27 @@ const App = () => {
               { title: 'Target', dataIndex: 'target', key: 'target' },
             ]}
           />
+
           <h2>Image Details</h2>
           <Table
-            dataSource={Array.isArray(allDetails.images) ? allDetails.images.filter(image => image.imageName).map((image, index) => ({ key: index, ...image })) : []}
+            dataSource={Array.isArray(allDetails.images) ? allDetails.images.map((image, index) => ({ key: index, ...image })) : []}
             columns={[
               { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
               { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
             ]}
           />
+
           <h2>Video Details</h2>
           <Table
-            dataSource={Array.isArray(allDetails.videos) ? allDetails.videos.map((video, index) => ({ key: index, ...video })) : []}
+            dataSource={Array.isArray(allDetails.videos) ? allDetails.videos.map((video, index) => ({
+              key: index,
+              transcript: video.transcript.join(', '),
+              cc: video.cc.join(', '),
+              autoplay: video.autoplay,
+              muted: video.muted,
+              ariaLabel: video.ariaLabel,
+              audioTrack: video.audioTrack,
+            })) : []}
             columns={[
               { title: 'Transcript', dataIndex: 'transcript', key: 'transcript' },
               { title: 'CC', dataIndex: 'cc', key: 'cc' },
@@ -195,17 +211,23 @@ const App = () => {
               { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
             ]}
           />
+
           <h2>Page Properties</h2>
           <Table
-            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((meta, index) => ({ key: index, ...meta })) : []}
+            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((property, index) => ({ key: index, ...property })) : []}
             columns={[
               { title: 'Name', dataIndex: 'name', key: 'name' },
               { title: 'Content', dataIndex: 'content', key: 'content' },
             ]}
           />
+
           <h2>Heading Details</h2>
           <Table
-            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({ key: index, ...heading })) : []}
+            dataSource={Array.isArray(allDetails.headings) ? allDetails.headings.map((heading, index) => ({
+              key: index,
+              level: heading.level,
+              text: heading.text,
+            })) : []}
             columns={[
               { title: 'Level', dataIndex: 'level', key: 'level' },
               { title: 'Text', dataIndex: 'text', key: 'text' },
@@ -213,11 +235,11 @@ const App = () => {
           />
         </>
       )}
+
       {dataType !== 'all-details' && (
         <Table
           dataSource={data}
           columns={columns}
-          pagination={false}
         />
       )}
     </div>
@@ -225,3 +247,4 @@ const App = () => {
 };
 
 export default App;
+

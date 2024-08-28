@@ -47,7 +47,7 @@ const App = () => {
             title: 'Status Code', 
             dataIndex: 'statusCode', 
             key: 'statusCode', 
-            render: (text, record) => <span style={{ color: record.statusColor }}>{text}</span> 
+            render: (text, record) => <span style={{ color: getStatusColor(record.statusCode) }}>{text}</span> 
           },
           { title: 'Target', dataIndex: 'target', key: 'target' },
         ]);
@@ -93,7 +93,13 @@ const App = () => {
           text: heading.text,
         })) || []);
       } else if (dataType === 'all-details') {
-        setAllDetails(responseData);
+        setAllDetails({
+          links: responseData.links || [],
+          images: responseData.images || [],
+          videoDetails: responseData.videoDetails || [],
+          metaTags: responseData.metaTags || [],
+          headingHierarchy: responseData.headingHierarchy || [],
+        });
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -104,28 +110,24 @@ const App = () => {
   };
 
   const handleDownloadExcel = () => {
-    if (allDetails) {
-      const sheetData = {
-        'Link Details': Array.isArray(allDetails.links) ? allDetails.links : [],
-        'Image Details': Array.isArray(allDetails.images) ? allDetails.images : [],
-        'Video Details': Array.isArray(allDetails.videoDetails) ? allDetails.videoDetails.map(video => ({
-          ...video,
-          transcript: video.transcript.join(', '),
-          cc: video.cc.join(', '),
-        })) : [],
-        'Page Properties': Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties : [],
-        'Heading Details': Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy : [],
-      };
+    const sheetData = {
+      'Link Details': Array.isArray(allDetails?.links) ? allDetails.links : [],
+      'Image Details': Array.isArray(allDetails?.images) ? allDetails.images : [],
+      'Video Details': Array.isArray(allDetails?.videoDetails) ? allDetails.videoDetails.map(video => ({
+        ...video,
+        transcript: video.transcript.join(', '),
+        cc: video.cc.join(', '),
+      })) : [],
+      'Page Properties': Array.isArray(allDetails?.metaTags) ? allDetails.metaTags : [],
+      'Heading Details': Array.isArray(allDetails?.headingHierarchy) ? allDetails.headingHierarchy : [],
+    };
 
-      const workbook = XLSX.utils.book_new();
-      Object.keys(sheetData).forEach(sheetName => {
-        const worksheet = XLSX.utils.json_to_sheet(sheetData[sheetName]);
-        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-      });
-      XLSX.writeFile(workbook, 'data.xlsx');
-    } else {
-      message.error('No data available to download.');
-    }
+    const workbook = XLSX.utils.book_new();
+    Object.keys(sheetData).forEach(sheetName => {
+      const worksheet = XLSX.utils.json_to_sheet(sheetData[sheetName]);
+      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    });
+    XLSX.writeFile(workbook, 'data.xlsx');
   };
 
   return (
@@ -177,77 +179,84 @@ const App = () => {
         Download as Excel
       </Button>
 
-      {dataType === 'all-details' && allDetails && (
+      {(dataType === 'all-details' || dataType === 'page-properties') && (
         <>
-          <h2>Link Details</h2>
-          <Table
-            dataSource={Array.isArray(allDetails.links) ? allDetails.links.map((link, index) => ({ key: index, ...link })) : []}
-            columns={[
-              { title: 'Link Type', dataIndex: 'linkType', key: 'linkType' },
-              { title: 'Link Text', dataIndex: 'linkText', key: 'linkText', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
-              { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
-              { title: 'URL', dataIndex: 'url', key: 'url' },
-              { title: 'Redirected URL', dataIndex: 'redirectedUrl', key: 'redirectedUrl' },
-              { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <span style={{ color: getStatusColor(record.statusCode) }}>{text}</span> },
-              { title: 'Target', dataIndex: 'target', key: 'target' },
-            ]}
-          />
-
-          <h2>Image Details</h2>
-          <Table
-            dataSource={Array.isArray(allDetails.images) ? allDetails.images.map((image, index) => ({ key: index, ...image })) : []}
-            columns={[
-              { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
-              { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> }
-            ]}
-          />
-
-          <h2>Video Details</h2>
-          <Table
-            dataSource={Array.isArray(allDetails.videoDetails) ? allDetails.videoDetails.map((video, index) => ({
-              key: index,
-              transcript: video.transcript.join(', '),
-              cc: video.cc.join(', '),
-              autoplay: video.autoplay,
-              muted: video.muted,
-              ariaLabel: video.ariaLabel,
-              audioTrack: video.audioTrack,
-            })) : []}
-            columns={[
-              { title: 'Transcript', dataIndex: 'transcript', key: 'transcript' },
-              { title: 'CC', dataIndex: 'cc', key: 'cc' },
-              { title: 'Autoplay', dataIndex: 'autoplay', key: 'autoplay' },
-              { title: 'Muted', dataIndex: 'muted', key: 'muted' },
-              { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
-              { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
-            ]}
-          />
-
-          <h2>Page Properties</h2>
-          <Table
-            dataSource={Array.isArray(allDetails.pageProperties) ? allDetails.pageProperties.map((meta, index) => ({ key: index, ...meta })) : []}
-            columns={[
-              { title: 'Name', dataIndex: 'name', key: 'name' },
-              { title: 'Content', dataIndex: 'content', key: 'content' },
-            ]}
-          />
-
-          <h2>Heading Hierarchy</h2>
-          <Table
-            dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({
-              key: index,
-              level: heading.level,
-              text: heading.text,
-            })) : []}
-            columns={[
-              { title: 'Level', dataIndex: 'level', key: 'level' },
-              { title: 'Text', dataIndex: 'text', key: 'text' },
-            ]}
-          />
+          {dataType === 'all-details' && allDetails && (
+            <>
+              <h2>Link Details</h2>
+              <Table
+                dataSource={Array.isArray(allDetails.links) ? allDetails.links.map((link, index) => ({ key: index, ...link })) : []}
+                columns={[
+                  { title: 'Link Type', dataIndex: 'linkType', key: 'linkType' },
+                  { title: 'Link Text', dataIndex: 'linkText', key: 'linkText', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
+                  { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
+                  { title: 'URL', dataIndex: 'url', key: 'url' },
+                  { title: 'Redirected URL', dataIndex: 'redirectedUrl', key: 'redirectedUrl' },
+                  { title: 'Status Code', dataIndex: 'statusCode', key: 'statusCode', render: (text, record) => <span style={{ color: getStatusColor(record.statusCode) }}>{text}</span> },
+                  { title: 'Target', dataIndex: 'target', key: 'target' },
+                ]}
+              />
+              <h2>Image Details</h2>
+              <Table
+                dataSource={Array.isArray(allDetails.images) ? allDetails.images.map((image, index) => ({ key: index, ...image })) : []}
+                columns={[
+                  { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
+                  { title: 'Alt Text', dataIndex: 'alt', key: 'alt', render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} /> },
+                ]}
+              />
+              <h2>Video Details</h2>
+              <Table
+                dataSource={Array.isArray(allDetails.videoDetails) ? allDetails.videoDetails.map((video, index) => ({
+                  key: index,
+                  transcript: video.transcript.join(', '),
+                  cc: video.cc.join(', '),
+                  autoplay: video.autoplay,
+                  muted: video.muted,
+                  ariaLabel: video.ariaLabel,
+                  audioTrack: video.audioTrack,
+                })) : []}
+                columns={[
+                  { title: 'Transcript', dataIndex: 'transcript', key: 'transcript' },
+                  { title: 'CC', dataIndex: 'cc', key: 'cc' },
+                  { title: 'Autoplay', dataIndex: 'autoplay', key: 'autoplay' },
+                  { title: 'Muted', dataIndex: 'muted', key: 'muted' },
+                  { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
+                  { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
+                ]}
+              />
+              <h2>Page Properties</h2>
+              <Table
+                dataSource={Array.isArray(allDetails.metaTags) ? allDetails.metaTags.map((meta, index) => ({ key: index, ...meta })) : []}
+                columns={[
+                  { title: 'Name', dataIndex: 'name', key: 'name' },
+                  { title: 'Content', dataIndex: 'content', key: 'content' },
+                ]}
+              />
+              <h2>Heading Hierarchy</h2>
+              <Table
+                dataSource={Array.isArray(allDetails.headingHierarchy) ? allDetails.headingHierarchy.map((heading, index) => ({
+                  key: index,
+                  level: heading.level,
+                  text: heading.text,
+                })) : []}
+                columns={[
+                  { title: 'Level', dataIndex: 'level', key: 'level' },
+                  { title: 'Text', dataIndex: 'text', key: 'text' },
+                ]}
+              />
+            </>
+          )}
+          {dataType === 'page-properties' && (
+            <Table
+              dataSource={Array.isArray(data) ? data : []}
+              columns={columns}
+              pagination={{ pageSize: 10 }}
+            />
+          )}
         </>
       )}
 
-      {data.length > 0 && (
+      {dataType !== 'all-details' && dataType !== 'page-properties' && (
         <Table
           dataSource={data}
           columns={columns}

@@ -81,7 +81,14 @@ const App = () => {
           { title: 'Name', dataIndex: 'name', key: 'name' },
           { title: 'Content', dataIndex: 'content', key: 'content' },
         ]);
-        setData(responseData.metaTags?.map((meta, index) => ({ key: index, ...meta })) || []);
+        const metaTagsData = Array.isArray(responseData.metaTags) 
+          ? responseData.metaTags.map((meta, index) => ({ 
+              key: index, 
+              name: meta.name || meta.property || 'Unknown',
+              content: meta.content || 'N/A'
+            }))
+          : [];
+        setData(metaTagsData);
       } else if (dataType === 'heading-hierarchy') {
         setColumns([
           { title: 'Level', dataIndex: 'level', key: 'level' },
@@ -97,7 +104,12 @@ const App = () => {
           links: responseData.links || [],
           images: responseData.images || [],
           videoDetails: responseData.videoDetails || [],
-          metaTags: responseData.metaTags || [],
+          metaTags: Array.isArray(responseData.metaTags) 
+            ? responseData.metaTags.map(meta => ({
+                name: meta.name || meta.property || 'Unknown',
+                content: meta.content || 'N/A'
+              })) 
+            : [],
           headingHierarchy: responseData.headingHierarchy || [],
         });
       }
@@ -226,7 +238,7 @@ const App = () => {
               />
               <h2>Page Properties</h2>
               <Table
-                dataSource={Array.isArray(allDetails.metaTags) ? allDetails.metaTags.map((meta, index) => ({ key: index, ...meta })) : []}
+                dataSource={allDetails.metaTags}
                 columns={[
                   { title: 'Name', dataIndex: 'name', key: 'name' },
                   { title: 'Content', dataIndex: 'content', key: 'content' },
@@ -248,7 +260,7 @@ const App = () => {
           )}
           {dataType === 'page-properties' && (
             <Table
-              dataSource={Array.isArray(data) ? data : []}
+              dataSource={data}
               columns={columns}
               pagination={{ pageSize: 10 }}
             />

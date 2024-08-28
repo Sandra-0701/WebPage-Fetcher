@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, Button, Input, Select, Checkbox, message } from 'antd';
 import * as XLSX from 'xlsx';
@@ -24,6 +24,11 @@ const App = () => {
 
   const API_BASE_URL = 'https://backend-webfetcher.vercel.app/api';
 
+  useEffect(() => {
+    console.log('Current data:', data);
+    console.log('Current allDetails:', allDetails);
+  }, [data, allDetails]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -32,6 +37,7 @@ const App = () => {
         onlyUhf,
       });
       const responseData = response.data;
+      console.log('API Response:', responseData);
 
       if (dataType === 'extract-urls') {
         setColumns([{ title: 'URL', dataIndex: 'url', key: 'url' }]);
@@ -88,6 +94,7 @@ const App = () => {
               content: meta.content || 'N/A'
             }))
           : [];
+        console.log('Processed metaTagsData:', metaTagsData);
         setData(metaTagsData);
       } else if (dataType === 'heading-hierarchy') {
         setColumns([
@@ -100,16 +107,19 @@ const App = () => {
           text: heading.text,
         })) || []);
       } else if (dataType === 'all-details') {
+        const processedMetaTags = Array.isArray(responseData.metaTags) 
+          ? responseData.metaTags.map((meta, index) => ({
+              key: index,
+              name: meta.name || meta.property || 'Unknown',
+              content: meta.content || 'N/A'
+            })) 
+          : [];
+        console.log('Processed metaTags for all-details:', processedMetaTags);
         setAllDetails({
           links: responseData.links || [],
           images: responseData.images || [],
           videoDetails: responseData.videoDetails || [],
-          metaTags: Array.isArray(responseData.metaTags) 
-            ? responseData.metaTags.map(meta => ({
-                name: meta.name || meta.property || 'Unknown',
-                content: meta.content || 'N/A'
-              })) 
-            : [],
+          metaTags: processedMetaTags,
           headingHierarchy: responseData.headingHierarchy || [],
         });
       }
@@ -237,6 +247,7 @@ const App = () => {
                 ]}
               />
               <h2>Page Properties</h2>
+              {console.log('Rendering Page Properties in all-details:', allDetails.metaTags)}
               <Table
                 dataSource={allDetails.metaTags}
                 columns={[
@@ -259,11 +270,14 @@ const App = () => {
             </>
           )}
           {dataType === 'page-properties' && (
-            <Table
-              dataSource={data}
-              columns={columns}
-              pagination={{ pageSize: 10 }}
-            />
+            <>
+              {console.log('Rendering Page Properties:', data)}
+              <Table
+                dataSource={data}
+                columns={columns}
+                pagination={{ pageSize: 10 }}
+              />
+            </>
           )}
         </>
       )}

@@ -223,7 +223,13 @@ const App = () => {
           )}
         </>
       )}
-
+      {dataType === 'page-properties' && (
+  <Table
+    dataSource={Array.isArray(data) ? data : []}
+    columns={columns}
+    pagination={{ pageSize: 10 }}
+  />
+)}
       {dataType !== 'all-details' && dataType !== 'page-properties' && (
         <Table
           dataSource={data}

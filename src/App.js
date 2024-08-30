@@ -22,7 +22,7 @@ const App = () => {
   const [allDetails, setAllDetails] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const API_BASE_URL = 'https://webpage-fetcher-backend-pkymjt279-sandra-sureshs-projects.vercel.app/api';
+  const API_BASE_URL = 'https://webpage-fetcher-backend.vercel.app/api';
 
   useEffect(() => {
     console.log('Current data:', data);

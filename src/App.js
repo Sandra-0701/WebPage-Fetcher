@@ -7,10 +7,10 @@ import './style.css';
 const { Option } = Select;
 
 const getStatusColor = (statusCode) => {
-  if (statusCode >= 500) return 'red'; 
-  if (statusCode >= 400) return 'orange'; 
-  if (statusCode >= 300) return 'blue'; 
-  return 'green'; 
+  if (statusCode >= 500) return 'red';
+  if (statusCode >= 400) return 'orange';
+  if (statusCode >= 300) return 'blue';
+  return 'green';
 };
 
 const App = () => {
@@ -39,7 +39,17 @@ const App = () => {
       const responseData = response.data;
       console.log('API Response:', responseData);
 
-      if (dataType === 'extract-urls') {
+      if (dataType === 'all-details') {
+        setAllDetails({
+          links: responseData.links || [],
+          images: responseData.images || [],
+          videoDetails: responseData.videoDetails || [],
+          pageProperties: responseData.pageProperties || [],
+          headingHierarchy: responseData.headingHierarchy || [],
+          uhfHeader: responseData.uhfHeader || '',
+          uhfFooter: responseData.uhfFooter || '',
+        });
+      } else if (dataType === 'extract-urls') {
         setColumns([{ title: 'URL', dataIndex: 'url', key: 'url' }]);
         setData(responseData.urls?.map((url, index) => ({ key: index, url })) || []);
       } else if (dataType === 'link-details') {
@@ -82,40 +92,18 @@ const App = () => {
           ariaLabel: video.ariaLabel,
           audioTrack: video.audioTrack,
         })) || []);
-      } else if (dataType === 'page-properties' || dataType === 'all-details') {
+      } else if (dataType === 'page-properties') {
         setColumns([
           { title: 'Name', dataIndex: 'name', key: 'name' },
           { title: 'Content', dataIndex: 'content', key: 'content' },
         ]);
-        const metaTagsData = Array.isArray(responseData.metaTags) 
-          ? responseData.metaTags.map((meta, index) => ({ 
-              key: index, 
-              name: meta.name || meta.property || 'Unknown',
-              content: meta.content || 'N/A'
-            }))
-          : [];
-        console.log('Processed metaTagsData:', metaTagsData);
-        if (dataType === 'page-properties') {
-          setData(metaTagsData);
-        } else {
-          setAllDetails({
-            links: responseData.links || [],
-            images: responseData.images || [],
-            videoDetails: responseData.videoDetails || [],
-            metaTags: metaTagsData,
-            headingHierarchy: responseData.headingHierarchy || [],
-          });
-        }
+        setData(responseData.pageProperties || []);
       } else if (dataType === 'heading-hierarchy') {
         setColumns([
           { title: 'Level', dataIndex: 'level', key: 'level' },
           { title: 'Text', dataIndex: 'text', key: 'text' },
         ]);
-        setData(responseData.headingHierarchy?.map((heading, index) => ({
-          key: index,
-          level: heading.level,
-          text: heading.text,
-        })) || []);
+        setData(flattenHeadingHierarchy(responseData.headingHierarchy || []));
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -129,14 +117,17 @@ const App = () => {
     const sheetData = {
       'Link Details': Array.isArray(allDetails?.links) ? allDetails.links : [],
       'Image Details': Array.isArray(allDetails?.images) ? allDetails.images : [],
-      'Video Details': Array.isArray(allDetails?.videoDetails) ? allDetails.videoDetails.map(video => ({
+      'Heading Hierarchy': Array.isArray(allDetails?.headingHierarchy) ? flattenHeadingHierarchy(allDetails.headingHierarchy) : [],
+    };
+
+    if (!onlyUhf) {
+      sheetData['Video Details'] = Array.isArray(allDetails?.videoDetails) ? allDetails.videoDetails.map(video => ({
         ...video,
         transcript: video.transcript.join(', '),
         cc: video.cc.join(', '),
-      })) : [],
-      'Page Properties': Array.isArray(allDetails?.metaTags) ? allDetails.metaTags : [],
-      'Heading Details': Array.isArray(allDetails?.headingHierarchy) ? allDetails.headingHierarchy : [],
-    };
+      })) : [];
+      sheetData['Page Properties'] = Array.isArray(allDetails?.pageProperties) ? allDetails.pageProperties : [];
+    }
 
     const workbook = XLSX.utils.book_new();
     Object.keys(sheetData).forEach(sheetName => {
@@ -144,6 +135,16 @@ const App = () => {
       XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     });
     XLSX.writeFile(workbook, 'data.xlsx');
+  };
+
+  const flattenHeadingHierarchy = (headings, level = 0) => {
+    return headings.reduce((acc, heading) => {
+      acc.push({ level: heading.level, text: '  '.repeat(level) + heading.text });
+      if (heading.children && heading.children.length > 0) {
+        acc.push(...flattenHeadingHierarchy(heading.children, level + 1));
+      }
+      return acc;
+    }, []);
   };
 
   return (
@@ -161,17 +162,18 @@ const App = () => {
         value={dataType}
         onChange={(value) => {
           setDataType(value);
-          setData([]); 
+          setData([]);
+          setAllDetails(null);
         }}
         style={{ width: 200, marginBottom: 10 }}
       >
+        <Option value="all-details">All Details</Option>
         <Option value="extract-urls">Extract URLs</Option>
         <Option value="link-details">Link Details</Option>
         <Option value="image-details">Image Details</Option>
         <Option value="video-details">Video Details</Option>
         <Option value="page-properties">Page Properties</Option>
         <Option value="heading-hierarchy">Heading Hierarchy</Option>
-        <Option value="all-details">All Details</Option>
       </Select>
       <Checkbox
         checked={onlyUhf}
@@ -188,25 +190,19 @@ const App = () => {
       >
         Fetch Data
       </Button>
-      <Button
-        onClick={handleDownloadExcel}
-        type="default"
-      >
-        Download as Excel
-      </Button>
-
-      {(dataType === 'all-details' || dataType === 'page-properties') && (
-        <Table
-          columns={columns}
-          dataSource={data}
-          pagination={false}
-          scroll={{ x: 'max-content' }}
-          style={{ marginTop: 20 }}
-        />
+      {allDetails && (
+        <Button
+          onClick={handleDownloadExcel}
+          type="default"
+          style={{ marginLeft: 10 }}
+        >
+          Download as Excel
+        </Button>
       )}
 
       {dataType === 'all-details' && allDetails && (
         <>
+          <h2>Link Details</h2>
           <Table
             columns={[
               { title: 'Link Type', dataIndex: 'linkType', key: 'linkType' },
@@ -223,6 +219,7 @@ const App = () => {
             style={{ marginTop: 20 }}
           />
 
+          <h2>Image Details</h2>
           <Table
             columns={[
               { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
@@ -234,54 +231,67 @@ const App = () => {
             style={{ marginTop: 20 }}
           />
 
-          <Table
-            columns={[
-              { title: 'Transcript', dataIndex: 'transcript', key: 'transcript' },
-              { title: 'CC', dataIndex: 'cc', key: 'cc' },
-              { title: 'Autoplay', dataIndex: 'autoplay', key: 'autoplay' },
-              { title: 'Muted', dataIndex: 'muted', key: 'muted' },
-              { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
-              { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
-            ]}
-            dataSource={allDetails.videoDetails.map((video, index) => ({
-              key: index,
-              transcript: video.transcript.join(', '),
-              cc: video.cc.join(', '),
-              autoplay: video.autoplay,
-              muted: video.muted,
-              ariaLabel: video.ariaLabel,
-              audioTrack: video.audioTrack,
-            }))}
-            pagination={false}
-            scroll={{ x: 'max-content' }}
-            style={{ marginTop: 20 }}
-          />
-
-          <Table
-            columns={[
-              { title: 'Name', dataIndex: 'name', key: 'name' },
-              { title: 'Content', dataIndex: 'content', key: 'content' },
-            ]}
-            dataSource={allDetails.metaTags}
-            pagination={false}
-            scroll={{ x: 'max-content' }}
-            style={{ marginTop: 20 }}
-          />
-
+          <h2>Heading Hierarchy</h2>
           <Table
             columns={[
               { title: 'Level', dataIndex: 'level', key: 'level' },
               { title: 'Text', dataIndex: 'text', key: 'text' },
             ]}
-            dataSource={allDetails.headingHierarchy}
+            dataSource={flattenHeadingHierarchy(allDetails.headingHierarchy)}
             pagination={false}
             scroll={{ x: 'max-content' }}
             style={{ marginTop: 20 }}
           />
+
+          {!onlyUhf && (
+            <>
+              <h2>Video Details</h2>
+              <Table
+                columns={[
+                  { title: 'Transcript', dataIndex: 'transcript', key: 'transcript' },
+                  { title: 'CC', dataIndex: 'cc', key: 'cc' },
+                  { title: 'Autoplay', dataIndex: 'autoplay', key: 'autoplay' },
+                  { title: 'Muted', dataIndex: 'muted', key: 'muted' },
+                  { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
+                  { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
+                ]}
+                dataSource={allDetails.videoDetails.map((video, index) => ({
+                  key: index,
+                  transcript: video.transcript.join(', '),
+                  cc: video.cc.join(', '),
+                  autoplay: video.autoplay,
+                  muted: video.muted,
+                  ariaLabel: video.ariaLabel,
+                  audioTrack: video.audioTrack,
+                }))}
+                pagination={false}
+                scroll={{ x: 'max-content' }}
+                style={{ marginTop: 20 }}
+              />
+
+              <h2>Page Properties</h2>
+              <Table
+                columns={[
+                  { title: 'Name', dataIndex: 'name', key: 'name' },
+                  { title: 'Content', dataIndex: 'content', key: 'content' },
+                ]}
+                dataSource={allDetails.pageProperties}
+                pagination={false}
+                scroll={{ x: 'max-content' }}
+                style={{ marginTop: 20 }}
+              />
+            </>
+          )}
+
+          <h2>UHF Header</h2>
+          <div dangerouslySetInnerHTML={{ __html: allDetails.uhfHeader }} />
+
+          <h2>UHF Footer</h2>
+          <div dangerouslySetInnerHTML={{ __html: allDetails.uhfFooter }} />
         </>
       )}
 
-      {dataType !== 'all-details' && dataType !== 'page-properties' && (
+      {dataType !== 'all-details' && (
         <Table
           columns={columns}
           dataSource={data}

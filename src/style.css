@@ -1,60 +1,95 @@
 /* styles.css */
 
 .container {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 24px;
+  color: #1890ff;
+  margin: 0;
+}
+
+.ant-input, .ant-select {
+  border-radius: 4px;
+}
+
+.ant-checkbox {
+  margin-bottom: 10px;
+}
+
+.ant-btn-primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+}
+
+.ant-btn-primary:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.ant-btn-default {
+  background-color: #ffffff;
+  border-color: #d9d9d9;
+}
+
+.ant-table-thead > tr > th {
+  background-color: #fafafa;
+  color: #333;
+  text-align: center;
+}
+
+.ant-table-tbody > tr > td {
+  background-color: #ffffff;
+}
+
+.ant-table-tbody > tr:nth-child(odd) > td {
+  background-color: #f9f9f9;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background-color: #e6f7ff;
+}
+
+.ant-table {
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .container {
+      padding: 10px;
   }
-  
+
   .header h1 {
-    font-size: 24px;
-    color: #1890ff;
-    margin-bottom: 20px;
+      font-size: 20px;
   }
-  
-  .ant-input {
-    border-radius: 4px;
+
+  .ant-select, .ant-input {
+      width: 100%;
   }
-  
-  .ant-select {
-    border-radius: 4px;
+
+  .ant-table {
+      font-size: 14px;
   }
-  
-  .ant-checkbox {
-    margin-bottom: 10px;
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+      font-size: 18px;
   }
-  
-  .ant-btn-primary {
-    background-color: #1890ff;
-    border-color: #1890ff;
+
+  .ant-btn-primary, .ant-btn-default {
+      width: 100%;
+      margin-bottom: 10px;
   }
-  
-  .ant-btn-default {
-    background-color: #ffffff;
-    border-color: #d9d9d9;
-  }
-  
-  .ant-table-thead > tr > th {
-    background-color: #fafafa;
-    color: #333;
-  }
-  
-  .ant-table-tbody > tr > td {
-    background-color: #ffffff;
-  }
-  
-  .ant-table-tbody > tr:nth-child(odd) > td {
-    background-color: #f9f9f9;
-  }
-  
-  .ant-table-tbody > tr:hover > td {
-    background-color: #e6f7ff;
-  }
-  
-  h2 {
-    color: #333;
-    margin-top: 20px;
-    border-bottom: 2px solid #e6f7ff;
-    padding-bottom: 10px;
-  }
-  
+}

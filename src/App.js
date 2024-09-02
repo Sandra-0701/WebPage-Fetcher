@@ -38,7 +38,7 @@ const App = () => {
       });
       const responseData = response.data;
       console.log('API Response:', responseData);
-
+  
       if (dataType === 'extract-urls') {
         setColumns([{ title: 'URL', dataIndex: 'url', key: 'url' }]);
         setData(responseData.urls?.map((url, index) => ({ key: index, url })) || []);
@@ -105,7 +105,21 @@ const App = () => {
             audioTrack: video.audioTrack,
           })) || []
         );
-      } else if (dataType === 'page-properties' || dataType === 'all-details') {
+      } else if (dataType === 'page-properties') {
+        setColumns([
+          { title: 'Name', dataIndex: 'name', key: 'name' },
+          { title: 'Content', dataIndex: 'content', key: 'content' },
+        ]);
+        const metaTagsData = Array.isArray(responseData.metaTags)
+          ? responseData.metaTags.map((meta, index) => ({
+              key: index,
+              name: meta.name || meta.property || 'Unknown',
+              content: meta.content || 'N/A',
+            }))
+          : [];
+        console.log('Processed metaTagsData:', metaTagsData);
+        setData(metaTagsData);
+      } else if (dataType === 'all-details') {
         setColumns([
           { title: 'Name', dataIndex: 'name', key: 'name' },
           { title: 'Content', dataIndex: 'content', key: 'content' },
@@ -118,17 +132,13 @@ const App = () => {
             content: meta.content || 'N/A',
           }));
         console.log('Processed metaTagsData:', metaTagsData);
-        if (dataType === 'page-properties') {
-          setData(metaTagsData || []);
-        } else {
-          setAllDetails({
-            links: responseData.links || [],
-            images: responseData.images || [],
-            videoDetails: responseData.videoDetails || [],
-            pageProperties: metaTagsData || [],
-            headingHierarchy: responseData.headingHierarchy || [],
-          });
-        }
+        setAllDetails({
+          links: responseData.links || [],
+          images: responseData.images || [],
+          videoDetails: responseData.videoDetails || [],
+          pageProperties: metaTagsData || [],
+          headingHierarchy: responseData.headingHierarchy || [],
+        });
       } else if (dataType === 'heading-hierarchy') {
         setColumns([
           { title: 'Level', dataIndex: 'level', key: 'level' },
@@ -149,6 +159,7 @@ const App = () => {
       setLoading(false);
     }
   };
+  
 
   const handleDownloadExcel = () => {
     const sheetData = {

@@ -6,31 +6,36 @@
   background-color: #f0f2f5;
   max-width: 1200px;
   margin: 0 auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .header h1 {
-  font-size: 24px;
+  font-size: 28px;
   color: #1890ff;
   margin: 0;
+  font-weight: bold;
 }
 
 .ant-input, .ant-select {
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 .ant-checkbox {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .ant-btn-primary {
   background-color: #1890ff;
   border-color: #1890ff;
   color: #fff;
+  border-radius: 8px;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .ant-btn-primary:hover {
@@ -41,16 +46,20 @@
 .ant-btn-default {
   background-color: #ffffff;
   border-color: #d9d9d9;
+  border-radius: 8px;
 }
 
 .ant-table-thead > tr > th {
-  background-color: #fafafa;
-  color: #333;
+  background-color: #e6f7ff;
+  color: #1890ff;
   text-align: center;
+  font-weight: bold;
+  border-bottom: 2px solid #1890ff;
 }
 
 .ant-table-tbody > tr > td {
   background-color: #ffffff;
+  text-align: center;
 }
 
 .ant-table-tbody > tr:nth-child(odd) > td {
@@ -63,15 +72,22 @@
 
 .ant-table {
   margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.ant-table .ant-table-cell {
+  padding: 16px;
 }
 
 @media (max-width: 768px) {
   .container {
-      padding: 10px;
+      padding: 15px;
   }
 
   .header h1 {
-      font-size: 20px;
+      font-size: 24px;
   }
 
   .ant-select, .ant-input {
@@ -85,7 +101,7 @@
 
 @media (max-width: 480px) {
   .header h1 {
-      font-size: 18px;
+      font-size: 20px;
   }
 
   .ant-btn-primary, .ant-btn-default {

@@ -290,16 +290,18 @@ const App = () => {
             style={{ marginTop: 20 }}
           />
 
-          <Table
-            columns={[
-              { title: 'Name', dataIndex: 'name', key: 'name' },
-              { title: 'Content', dataIndex: 'content', key: 'content' },
-            ]}
-            dataSource={allDetails.pageProperties}
-            pagination={false}
-            scroll={{ x: 'max-content' }}
-            style={{ marginTop: 20 }}
-          />
+          {allDetails.pageProperties && allDetails.pageProperties.length > 0 && (
+            <Table
+              columns={[
+                { title: 'Name', dataIndex: 'name', key: 'name' },
+                { title: 'Content', dataIndex: 'content', key: 'content' },
+              ]}
+              dataSource={allDetails.pageProperties}
+              pagination={false}
+              scroll={{ x: 'max-content' }}
+              style={{ marginTop: 20 }}
+            />
+          )}
 
           <Table
             columns={[
@@ -312,16 +314,6 @@ const App = () => {
             style={{ marginTop: 20 }}
           />
         </>
-      )}
-
-      {dataType !== 'all-details' && dataType !== 'page-properties' && (
-        <Table
-          columns={columns}
-          dataSource={data}
-          pagination={false}
-          scroll={{ x: 'max-content' }}
-          style={{ marginTop: 20 }}
-        />
       )}
     </div>
   );

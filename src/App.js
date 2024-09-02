@@ -1,7 +1,6 @@
-// App.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, Button, Input, Select, Checkbox, message } from 'antd';
+import { Table, Button, Input, Select, Checkbox, message, Spin } from 'antd';
 import * as XLSX from 'xlsx';
 import './style.css';
 
@@ -206,89 +205,131 @@ const App = () => {
       >
         Only UHF
       </Checkbox>
-      <Button type="primary" onClick={fetchData} loading={loading} style={{ marginRight: 10 }}>
+      <Button
+        type="primary"
+        onClick={fetchData}
+        loading={loading}
+        style={{ marginRight: 10 }}
+      >
         Fetch Data
       </Button>
-      {dataType !== 'all-details' && (
-        <Table
-          dataSource={data}
-          columns={columns}
-          pagination={false}
-          bordered
-          title={() => dataType.replace('-', ' ').toUpperCase()}
-        />
-      )}
-      {dataType === 'all-details' && (
+      {loading ? (
+        <Spin size="large" style={{ display: 'block', margin: '20px auto' }} />
+      ) : (
         <>
-          <Table
-            dataSource={allDetails?.links || []}
-            columns={[
-              { title: 'Link Type', dataIndex: 'linkType', key: 'linkType' },
-              { title: 'Link Text', dataIndex: 'linkText', key: 'linkText' },
-              { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
-              { title: 'URL', dataIndex: 'url', key: 'url' },
-              { title: 'Redirected URL', dataIndex: 'redirectedUrl', key: 'redirectedUrl' },
-              {
-                title: 'Status Code',
-                dataIndex: 'statusCode',
-                key: 'statusCode',
-                render: (text, record) => (
-                  <span style={{ color: record.statusColor }}>{text}</span>
-                ),
-              },
-              { title: 'Target', dataIndex: 'target', key: 'target' },
-            ]}
-            pagination={false}
-            bordered
-            title={() => 'Link Details'}
-          />
-          <Table
-            dataSource={allDetails?.images || []}
-            columns={[
-              { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
-              { title: 'Alt Text', dataIndex: 'alt', key: 'alt' },
-            ]}
-            pagination={false}
-            bordered
-            title={() => 'Image Details'}
-          />
-          <Table
-            dataSource={allDetails?.videoDetails || []}
-            columns={[
-              { title: 'Transcript', dataIndex: 'transcript', key: 'transcript' },
-              { title: 'CC', dataIndex: 'cc', key: 'cc' },
-              { title: 'Autoplay', dataIndex: 'autoplay', key: 'autoplay' },
-              { title: 'Muted', dataIndex: 'muted', key: 'muted' },
-              { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
-              { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
-            ]}
-            pagination={false}
-            bordered
-            title={() => 'Video Details'}
-          />
-          <Table
-            dataSource={allDetails?.pageProperties || []}
-            columns={[
-              { title: 'Name', dataIndex: 'name', key: 'name' },
-              { title: 'Content', dataIndex: 'content', key: 'content' },
-            ]}
-            pagination={false}
-            bordered
-            title={() => 'Page Properties'}
-          />
-          <Table
-            dataSource={allDetails?.headingHierarchy || []}
-            columns={[
-              { title: 'Level', dataIndex: 'level', key: 'level' },
-              { title: 'Text', dataIndex: 'text', key: 'text' },
-            ]}
-            pagination={false}
-            bordered
-            title={() => 'Heading Hierarchy'}
-          />
-          <Button type="primary" onClick={handleDownloadExcel}>
-            Download All Details
-          </Button>
+          {dataType !== 'all-details' && data.length > 0 && (
+            <Table
+              dataSource={data}
+              columns={columns}
+              pagination={false}
+              bordered
+              style={{ marginTop: 20 }}
+            />
+          )}
+          {dataType === 'all-details' && allDetails && (
+            <>
+              {allDetails.links.length > 0 && (
+                <Table
+                  dataSource={allDetails.links}
+                  columns={[
+                    { title: 'Link Type', dataIndex: 'linkType', key: 'linkType' },
+                    {
+                      title: 'Link Text',
+                      dataIndex: 'linkText',
+                      key: 'linkText',
+                      render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} />,
+                    },
+                    { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
+                    { title: 'URL', dataIndex: 'url', key: 'url' },
+                    { title: 'Redirected URL', dataIndex: 'redirectedUrl', key: 'redirectedUrl' },
+                    {
+                      title: 'Status Code',
+                      dataIndex: 'statusCode',
+                      key: 'statusCode',
+                      render: (text, record) => (
+                        <span style={{ color: record.statusColor }}>{text}</span>
+                      ),
+                    },
+                    { title: 'Target', dataIndex: 'target', key: 'target' },
+                  ]}
+                  pagination={false}
+                  bordered
+                  title={() => 'Link Details'}
+                  style={{ marginTop: 20 }}
+                />
+              )}
+              {allDetails.images.length > 0 && (
+                <Table
+                  dataSource={allDetails.images}
+                  columns={[
+                    { title: 'Image Name', dataIndex: 'imageName', key: 'imageName' },
+                    {
+                      title: 'Alt Text',
+                      dataIndex: 'alt',
+                      key: 'alt',
+                      render: (text) => <div dangerouslySetInnerHTML={{ __html: text }} />,
+                    },
+                  ]}
+                  pagination={false}
+                  bordered
+                  title={() => 'Image Details'}
+                  style={{ marginTop: 20 }}
+                />
+              )}
+              {allDetails.videoDetails.length > 0 && (
+                <Table
+                  dataSource={allDetails.videoDetails}
+                  columns={[
+                    { title: 'Transcript', dataIndex: 'transcript', key: 'transcript' },
+                    { title: 'CC', dataIndex: 'cc', key: 'cc' },
+                    { title: 'Autoplay', dataIndex: 'autoplay', key: 'autoplay' },
+                    { title: 'Muted', dataIndex: 'muted', key: 'muted' },
+                    { title: 'ARIA Label', dataIndex: 'ariaLabel', key: 'ariaLabel' },
+                    { title: 'Audio Track Present', dataIndex: 'audioTrack', key: 'audioTrack' },
+                  ]}
+                  pagination={false}
+                  bordered
+                  title={() => 'Video Details'}
+                  style={{ marginTop: 20 }}
+                />
+              )}
+              {allDetails.pageProperties.length > 0 && (
+                <Table
+                  dataSource={allDetails.pageProperties}
+                  columns={[
+                    { title: 'Name', dataIndex: 'name', key: 'name' },
+                    { title: 'Content', dataIndex: 'content', key: 'content' },
+                  ]}
+                  pagination={false}
+                  bordered
+                  title={() => 'Page Properties'}
+                  style={{ marginTop: 20 }}
+                />
+              )}
+              {allDetails.headingHierarchy.length > 0 && (
+                <Table
+                  dataSource={allDetails.headingHierarchy}
+                  columns={[
+                    { title: 'Level', dataIndex: 'level', key: 'level' },
+                    { title: 'Text', dataIndex: 'text', key: 'text' },
+                  ]}
+                  pagination={false}
+                  bordered
+                  title={() => 'Heading Hierarchy'}
+                  style={{ marginTop: 20 }}
+                />
+              )}
+            </>
+          )}
+          {data.length > 0 || allDetails ? (
+            <Button
+              type="primary"
+              onClick={handleDownloadExcel}
+              style={{ marginTop: 20 }}
+            >
+              Download Excel
+            </Button>
+          ) : null}
         </>
       )}
     </div>

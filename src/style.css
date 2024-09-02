@@ -52,14 +52,14 @@
 .ant-table-thead > tr > th {
   background-color: #e6f7ff;
   color: #1890ff;
-  text-align: center;
+  text-align: left; /* Change to left alignment */
   font-weight: bold;
   border-bottom: 2px solid #1890ff;
 }
 
 .ant-table-tbody > tr > td {
   background-color: #ffffff;
-  text-align: center;
+  text-align: left; /* Change to left alignment */
 }
 
 .ant-table-tbody > tr:nth-child(odd) > td {
